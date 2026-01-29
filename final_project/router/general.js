@@ -92,50 +92,59 @@ general.get('/', async (req, res) => {
     }
 });
 
-module.exports.general = general;
-
-// Get book details based on ISBN
 general.get('/isbn/:isbn', async (req, res) => {
+    const isbn = req.params.isbn;
+
     try {
-        const isbn = req.params.isbn;
-        const response = await new Promise((resolve, reject) => {
-            if (books[isbn]) resolve(books[isbn]);
-            else reject("Book not found");
-        });
-        res.status(200).json(response);
-    } catch (err) {
-        res.status(404).json({ message: err });
+        const response = await axios.get(`http://localhost:5000/isbn/${isbn}`);
+        res.status(200).json(response.data);
+    } catch (error) {
+        res.status(404).json({ message: "Book not found" });
     }
 });
+
 
   
-// Get book details based on author
 general.get('/author/:author', async (req, res) => {
+    const author = req.params.author;
+
     try {
-        const author = req.params.author;
-        const response = await new Promise((resolve, reject) => {
-            const result = Object.values(books).filter(book => book.author === author);
-            if (result.length > 0) resolve(result);
-            else reject("Author not found");
-        });
-        res.status(200).json(response);
-    } catch (err) {
-        res.status(404).json({ message: err });
+        const response = await axios.get('http://localhost:5000/');
+        const booksData = response.data;
+
+        const result = Object.values(booksData).filter(
+            book => book.author.toLowerCase() === author.toLowerCase()
+        );
+
+        if (result.length > 0) {
+            res.status(200).json(result);
+        } else {
+            res.status(404).json({ message: "Author not found" });
+        }
+    } catch (error) {
+        res.status(500).json({ message: "Error retrieving books" });
     }
 });
 
-// Get all books based on title
+
 general.get('/title/:title', async (req, res) => {
+    const title = req.params.title;
+
     try {
-        const title = req.params.title;
-        const response = await new Promise((resolve, reject) => {
-            const result = Object.values(books).filter(book => book.title === title);
-            if (result.length > 0) resolve(result);
-            else reject("Title not found");
-        });
-        res.status(200).json(response);
-    } catch (err) {
-        res.status(404).json({ message: err });
+        const response = await axios.get('http://localhost:5000/');
+        const booksData = response.data;
+
+        const result = Object.values(booksData).filter(
+            book => book.title.toLowerCase() === title.toLowerCase()
+        );
+
+        if (result.length > 0) {
+            res.status(200).json(result);
+        } else {
+            res.status(404).json({ message: "Title not found" });
+        }
+    } catch (error) {
+        res.status(500).json({ message: "Error retrieving books" });
     }
 });
 
@@ -152,4 +161,6 @@ public_users.get('/review/:isbn', function (req, res) {
 });
 
 
-module.exports.general = public_users;
+module.exports.general = general;
+module.exports.public_users = public_users;
+
