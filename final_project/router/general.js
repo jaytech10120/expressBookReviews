@@ -83,14 +83,12 @@ public_users.get('/', function (req, res) {
     res.send(JSON.stringify(books, null, 4));
 });
 
-// Get all books (Promise version)
 general.get('/', async (req, res) => {
     try {
-        // Here, we simulate async call
-        const response = await new Promise((resolve) => resolve(books));
-        res.status(200).json(response);
-    } catch (err) {
-        res.status(500).json({ message: err.message });
+        const response = await axios.get('http://localhost:5000/');
+        res.status(200).json(response.data);
+    } catch (error) {
+        res.status(500).json({ message: "Error retrieving books" });
     }
 });
 
