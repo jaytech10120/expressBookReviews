@@ -84,97 +84,60 @@ public_users.get('/', function (req, res) {
 });
 
 // Get all books (Promise version)
-general.get('/', (req, res) => {
-    axios.get('http://localhost:5000/books') // Assuming books are served at /books
-        .then(response => {
-            res.status(200).json(response.data);
-        })
-        .catch(error => {
-            res.status(500).json({ message: "Error fetching books", error: error.message });
-        });
+general.get('/', async (req, res) => {
+    try {
+        // Here, we simulate async call
+        const response = await new Promise((resolve) => resolve(books));
+        res.status(200).json(response);
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
 });
 
 module.exports.general = general;
 
 // Get book details based on ISBN
-public_users.get('/isbn/:isbn', function (req, res) {
-    const isbn = req.params.isbn;
-    axios.get(`http://localhost:5000/books/${isbn}`)
-    .then(response => {
-        res.status(200).json(response.data);
-    })
-    .catch(err => {
-        res.status(404).json({ message: `Book with ISBN ${isbn} not found` });
-    });
-    if (books[isbn]) {
-        res.status(200).json(books[isbn]);
-    } else {
-        res.status(404).json({ message: "Book not found" });
+general.get('/isbn/:isbn', async (req, res) => {
+    try {
+        const isbn = req.params.isbn;
+        const response = await new Promise((resolve, reject) => {
+            if (books[isbn]) resolve(books[isbn]);
+            else reject("Book not found");
+        });
+        res.status(200).json(response);
+    } catch (err) {
+        res.status(404).json({ message: err });
     }
 });
-
 
   
 // Get book details based on author
-public_users.get('/author/:author', function (req, res) {
-    const author = req.params.author.toLowerCase();
-    let results = [];
-
-    // Get all keys of the books object
-    const bookKeys = Object.keys(books);
-
-    // Iterate through the books
-    bookKeys.forEach((key) => {
-        if (books[key].author.toLowerCase() === author) {
-            results.push(books[key]);
-        }
-    });
-
-    if (results.length > 0) {
-        res.status(200).json(results);
-    } else {
-        res.status(404).json({ message: "No books found for this author" });
-    }
-});
-
-// Get book details based on author using async-await
-public_users.get('/author/:author', async (req, res) => {
+general.get('/author/:author', async (req, res) => {
     try {
         const author = req.params.author;
-        const allBooks = Object.values(books); // Convert books object to array
-        const authorBooks = allBooks.filter(book => book.author.toLowerCase() === author.toLowerCase());
-
-        if (authorBooks.length > 0) {
-            // Simulate async behavior (could also call external API with Axios)
-            await new Promise(resolve => setTimeout(resolve, 100)); // optional delay
-            res.status(200).json(authorBooks);
-        } else {
-            res.status(404).json({ message: "No books found by this author" });
-        }
+        const response = await new Promise((resolve, reject) => {
+            const result = Object.values(books).filter(book => book.author === author);
+            if (result.length > 0) resolve(result);
+            else reject("Author not found");
+        });
+        res.status(200).json(response);
     } catch (err) {
-        res.status(500).json({ message: "Error fetching books by author", error: err.message });
+        res.status(404).json({ message: err });
     }
 });
 
 // Get all books based on title
-public_users.get('/title/:title', function (req, res) {
-    const title = req.params.title.toLowerCase();
-    let results = [];
-
-    // Get all keys from books object
-    const bookKeys = Object.keys(books);
-
-    // Iterate through books and match title
-    bookKeys.forEach((key) => {
-        if (books[key].title.toLowerCase() === title) {
-            results.push(books[key]);
-        }
-    });
-
-    if (results.length > 0) {
-        res.status(200).json(results);
-    } else {
-        res.status(404).json({ message: "No books found with this title" });
+general.get('/title/:title', async (req, res) => {
+    try {
+        const title = req.params.title;
+        const response = await new Promise((resolve, reject) => {
+            const result = Object.values(books).filter(book => book.title === title);
+            if (result.length > 0) resolve(result);
+            else reject("Title not found");
+        });
+        res.status(200).json(response);
+    } catch (err) {
+        res.status(404).json({ message: err });
     }
 });
 
